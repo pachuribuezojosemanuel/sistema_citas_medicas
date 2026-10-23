@@ -3,63 +3,36 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bitacora;
+use App\Models\User;
 use Illuminate\Http\Request;
 
+/**
+ * Consulta de la bitácora (solo lectura).
+ */
 class BitacoraController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'user_id' => ['nullable', 'integer'],
+            'accion'  => ['nullable', 'string', 'max:50'],
+            'desde'   => ['nullable', 'date'],
+            'hasta'   => ['nullable', 'date', 'after_or_equal:desde'],
+        ]);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+        $registros = Bitacora::with('user')
+            ->when($request->filled('user_id'), fn ($q) => $q->where('user_id', $request->integer('user_id')))
+            ->when($request->filled('accion'),  fn ($q) => $q->where('accion', $request->input('accion')))
+            ->when($request->filled('desde'),   fn ($q) => $q->whereDate('fecha_hora', '>=', $request->input('desde')))
+            ->when($request->filled('hasta'),   fn ($q) => $q->whereDate('fecha_hora', '<=', $request->input('hasta')))
+            ->orderByDesc('fecha_hora')
+            ->orderByDesc('id')
+            ->paginate(20)
+            ->withQueryString();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $usuarios = User::orderBy('name')->get(['id', 'name']);
+        $acciones = Bitacora::select('accion')->distinct()->orderBy('accion')->pluck('accion');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Bitacora $bitacora)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Bitacora $bitacora)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Bitacora $bitacora)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Bitacora $bitacora)
-    {
-        //
+        return view('bitacora.index', compact('registros', 'usuarios', 'acciones'));
     }
 }

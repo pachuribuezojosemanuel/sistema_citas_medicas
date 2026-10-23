@@ -1,0 +1,20 @@
+{
+    "Dashboard": "Inicio",
+    "Profile": "Perfil",
+    "Log Out": "Cerrar sesión",
+    "Profile Information": "Información del perfil",
+    "Update your account's profile information and email address.": "Actualice su nombre de usuario y correo electrónico.",
+    "Name": "Nombre de usuario",
+    "Email": "Correo electrónico",
+    "Save": "Guardar",
+    "Saved.": "Guardado.",
+    "Update Password": "Cambiar contraseña",
+    "Ensure your account is using a long, random password to stay secure.": "Use una contraseña larga y segura para proteger su cuenta.",
+    "Current Password": "Contraseña actual",
+    "New Password": "Nueva contraseña",
+    "Confirm Password": "Confirmar contraseña",
+    "Showing": "Mostrando",
+    "to": "a",
+    "of": "de",
+    "results": "resultados"
+}

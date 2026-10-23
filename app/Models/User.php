@@ -39,7 +39,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'ultimo_acceso'     => 'datetime',
+            'password'          => 'hashed',
+            'estado'            => 'boolean',
         ];
     }
 
@@ -47,6 +49,33 @@ class User extends Authenticatable
     public function rol()
     {
         return $this->belongsTo(Rol::class, 'rol_id');
+    }
+
+    /**
+     * Códigos de permiso del usuario (se cargan una sola vez por petición).
+     */
+    protected ?array $codigosPermiso = null;
+
+    /**
+     * Indica si el rol del usuario tiene el permiso indicado.
+     */
+    public function tienePermiso(string $codigo): bool
+    {
+        if ($this->codigosPermiso === null) {
+            $this->codigosPermiso = $this->rol
+                ? $this->rol->permisos()->pluck('codigo')->all()
+                : [];
+        }
+
+        return in_array($codigo, $this->codigosPermiso, true);
+    }
+
+    /**
+     * Indica si el usuario tiene el rol indicado (por nombre).
+     */
+    public function tieneRol(string $nombre): bool
+    {
+        return $this->rol?->nombre === $nombre;
     }
 
     // Un usuario da acceso a 0..1 personal / médico / paciente

@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,8 +19,14 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+        public function boot(): void
     {
-        //
+        // @permiso('CODIGO') ... @endpermiso
+        Blade::if('permiso', function (string $codigo) {
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            return $user !== null && $user->tienePermiso($codigo);
+        });
     }
 }
