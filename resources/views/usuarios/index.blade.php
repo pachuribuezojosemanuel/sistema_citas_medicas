@@ -1,9 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Usuarios</h2>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Usuarios y personal</h2>
             <a href="{{ route('usuarios.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+               class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                 + Nuevo usuario
             </a>
         </div>
@@ -14,9 +14,9 @@
 
             {{-- Filtros --}}
             <form method="GET" action="{{ route('usuarios.index') }}"
-                class="bg-white shadow-sm sm:rounded-lg p-4 grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <x-text-input name="buscar" :value="$buscar" placeholder="Buscar por usuario o correo"
-                    class="sm:col-span-2" maxlength="100" />
+                  class="bg-white shadow-sm sm:rounded-lg p-4 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <x-text-input name="buscar" :value="$buscar" placeholder="Usuario, correo, nombre o CI"
+                              class="sm:col-span-2" maxlength="100" />
 
                 <x-select-input name="rol_id">
                     <option value="">Todos los roles</option>
@@ -51,23 +51,31 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse ($usuarios as $u)
                             <tr>
-                                <td class="px-4 py-3 font-medium text-gray-900">{{ $u->name }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-gray-900">{{ $u->name }}</div>
+                                    @if ($u->nombre_mostrar)
+                                        <div class="text-xs text-gray-500">
+                                            {{ $u->nombre_mostrar }}
+                                            @if ($u->personal) · {{ $u->personal->cargo }} @endif
+                                        </div>
+                                    @else
+                                        <div class="text-xs text-amber-600">Sin datos personales</div>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-gray-600">{{ $u->email }}</td>
                                 <td class="px-4 py-3 text-gray-600">{{ $u->rol->nombre }}</td>
                                 <td class="px-4 py-3"><x-estado-badge :activo="$u->estado" /></td>
-                                <td class="px-4 py-3 text-gray-600">
-                                    {{ $u->ultimo_acceso?->format('d/m/Y H:i') ?? 'Nunca' }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $u->ultimo_acceso?->format('d/m/Y H:i') ?? 'Nunca' }}</td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap space-x-3">
-                                    <a href="{{ route('usuarios.edit', $u) }}"
-                                        class="text-indigo-600 hover:text-indigo-800 font-medium">Editar</a>
+                                    <a href="{{ route('usuarios.edit', $u) }}" class="text-indigo-600 hover:text-indigo-800 font-medium">Editar</a>
 
                                     @if ($u->id !== Auth::id())
                                         <form method="POST" action="{{ route('usuarios.estado', $u) }}" class="inline"
-                                            data-confirmar="¿{{ $u->estado ? 'Desactivar' : 'Activar' }} al usuario {{ $u->name }}?">
+                                              data-confirmar="¿{{ $u->estado ? 'Desactivar' : 'Activar' }} al usuario {{ $u->name }}?">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit"
-                                                class="font-medium {{ $u->estado ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800' }}">
+                                                    class="font-medium {{ $u->estado ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800' }}">
                                                 {{ $u->estado ? 'Desactivar' : 'Activar' }}
                                             </button>
                                         </form>
@@ -76,8 +84,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-4 py-6 text-center text-gray-500">No se encontraron
-                                    usuarios.</td>
+                                <td colspan="6" class="px-4 py-6 text-center text-gray-500">No se encontraron usuarios.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -87,4 +94,4 @@
             {{ $usuarios->links() }}
         </div>
     </div>
-</x-app-layout>
+</x-app-layout>1

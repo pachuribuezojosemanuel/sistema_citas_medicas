@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Personal extends Model
@@ -17,6 +18,15 @@ class Personal extends Model
         'estado'        => 'boolean',
     ];
 
+    /**
+     * $personal->nombre_completo
+     */
+    protected function nombreCompleto(): Attribute
+    {
+        return Attribute::get(fn () => "{$this->nombres} {$this->apellidos}");
+    }
+
+    // Usuario que da acceso a este miembro del personal
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

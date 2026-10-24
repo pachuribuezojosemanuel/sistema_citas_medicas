@@ -32,5 +32,6 @@ return [
         ['texto' => 'Usuarios',          'ruta' => 'usuarios.index', 'permiso' => 'USUARIO_GESTIONAR'],
         ['texto' => 'Roles y permisos',  'ruta' => 'roles.index',    'permiso' => 'ROL_GESTIONAR'],
         ['texto' => 'Bitácora',          'ruta' => 'bitacora.index', 'permiso' => 'BITACORA_VER'],
+        ['texto' => 'Usuarios y personal', 'ruta' => 'usuarios.index', 'permiso' => 'USUARIO_GESTIONAR'],
     ]],
 ];

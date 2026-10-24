@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -43,6 +44,19 @@ class User extends Authenticatable
             'password'          => 'hashed',
             'estado'            => 'boolean',
         ];
+    }
+
+        /**
+     * Nombre real de la persona, venga de Personal, Médico o Paciente.
+     * $user->nombre_mostrar
+     */
+    protected function nombreMostrar(): Attribute
+    {
+        return Attribute::get(fn () =>
+            $this->personal?->nombre_completo
+            ?? $this->medico?->nombre_completo
+            ?? $this->paciente?->nombre_completo
+        );
     }
 
 

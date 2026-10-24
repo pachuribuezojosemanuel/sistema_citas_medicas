@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             RolSeeder::class,
             UserSeeder::class,           // Modulo 2
             CatalogoSeeder::class,       // Módulo 3
+            PersonalSeeder::class,       // Módulo 2B
             EspecialidadSeeder::class,   // Módulo 4
             ConsultorioSeeder::class,    // Módulo 5
             MedicoSeeder::class,         // Módulos 6 y 7 (datos de prueba)

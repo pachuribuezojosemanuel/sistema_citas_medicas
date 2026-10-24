@@ -14,6 +14,19 @@ class Rol extends Model
         'estado' => 'boolean',
     ];
 
+    /**
+     * Roles que tienen su propio módulo de registro (no son personal administrativo).
+     */
+    public const ROLES_CON_MODULO = ['Médico', 'Paciente'];
+
+    /**
+     * Indica si el rol corresponde a personal administrativo.
+     */
+    public function esDePersonal(): bool
+    {
+        return ! in_array($this->nombre, self::ROLES_CON_MODULO, true);
+    }
+
     // Un rol es asignado a muchos usuarios
     public function users()
     {
@@ -24,6 +37,6 @@ class Rol extends Model
     public function permisos()
     {
         return $this->belongsToMany(Permiso::class, 'rol_permiso', 'rol_id', 'permiso_id')
-                    ->withPivot('fecha_asignacion');
+            ->withPivot('fecha_asignacion');
     }
 }
