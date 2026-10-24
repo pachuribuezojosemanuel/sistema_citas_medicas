@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\BitacoraController;
+use App\Http\Controllers\ConsultorioController;
+use App\Http\Controllers\EspecialidadController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
@@ -42,6 +44,26 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::get('bitacora', [BitacoraController::class, 'index'])
         ->middleware('permiso:BITACORA_VER')
         ->name('bitacora.index');
+
+        // ===== Módulo 4: Especialidades (RF04) =====
+    Route::middleware('permiso:ESPECIALIDAD_GESTIONAR')->group(function () {
+        Route::resource('especialidades', EspecialidadController::class)
+            ->except(['show', 'destroy'])
+            ->parameters(['especialidades' => 'especialidad']);
+
+        Route::patch('especialidades/{especialidad}/estado', [EspecialidadController::class, 'cambiarEstado'])
+            ->name('especialidades.estado');
+    });
+
+    // ===== Módulo 5: Consultorios =====
+    Route::middleware('permiso:CONSULTORIO_GESTIONAR')->group(function () {
+        Route::resource('consultorios', ConsultorioController::class)
+            ->except(['show', 'destroy'])
+            ->parameters(['consultorios' => 'consultorio']);
+
+        Route::patch('consultorios/{consultorio}/estado', [ConsultorioController::class, 'cambiarEstado'])
+            ->name('consultorios.estado');
+    });
 });
 
 require __DIR__ . '/auth.php';

@@ -2,64 +2,75 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EspecialidadRequest;
+use App\Models\Bitacora;
 use App\Models\Especialidad;
 use Illuminate\Http\Request;
 
+/**
+ * Gestión de especialidades médicas (RF04).
+ * No se eliminan: se activan o desactivan.
+ */
 class EspecialidadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $buscar = trim((string) $request->input('buscar'));
+
+        $especialidades = Especialidad::withCount('medicos')
+            ->when($buscar !== '', fn ($q) => $q->where('nombre', 'ilike', "%{$buscar}%"))
+            ->when($request->filled('estado'), fn ($q) => $q->where('estado', $request->input('estado') === '1'))
+            ->orderBy('nombre')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('especialidades.index', compact('especialidades', 'buscar'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('especialidades.create', ['especialidad' => new Especialidad()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(EspecialidadRequest $request)
     {
-        //
+        $especialidad = Especialidad::create($request->validated());
+
+        Bitacora::registrar('REGISTRAR', 'Especialidades', "Especialidad creada: {$especialidad->nombre}");
+
+        return redirect()->route('especialidades.index')
+            ->with('exito', "Especialidad {$especialidad->nombre} registrada correctamente.");
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Especialidad $especialidad)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Especialidad $especialidad)
     {
-        //
+        return view('especialidades.edit', compact('especialidad'));
+    }
+
+    public function update(EspecialidadRequest $request, Especialidad $especialidad)
+    {
+        $anterior = $especialidad->nombre;
+        $especialidad->update($request->validated());
+
+        Bitacora::registrar('MODIFICAR', 'Especialidades', "Especialidad modificada: {$anterior} → {$especialidad->nombre}");
+
+        return redirect()->route('especialidades.index')
+            ->with('exito', "Especialidad {$especialidad->nombre} actualizada correctamente.");
     }
 
     /**
-     * Update the specified resource in storage.
+     * Activa o desactiva. Una especialidad inactiva no se ofrece para nuevas citas,
+     * pero sus citas y médicos históricos se conservan.
      */
-    public function update(Request $request, Especialidad $especialidad)
+    public function cambiarEstado(Especialidad $especialidad)
     {
-        //
-    }
+        $especialidad->update(['estado' => ! $especialidad->estado]);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Especialidad $especialidad)
-    {
-        //
+        $accion = $especialidad->estado ? 'ACTIVAR' : 'DESACTIVAR';
+        Bitacora::registrar($accion, 'Especialidades', "Especialidad {$especialidad->nombre}");
+
+        return back()->with('exito', $especialidad->estado
+            ? "Especialidad {$especialidad->nombre} activada."
+            : "Especialidad {$especialidad->nombre} desactivada. No estará disponible para nuevas citas.");
     }
 }

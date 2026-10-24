@@ -11,7 +11,10 @@ class DatabaseSeeder extends Seeder
         $this->call([
             PermisoSeeder::class,
             RolSeeder::class,
-            UserSeeder::class,
+            UserSeeder::class,           // Modulo 2
+            CatalogoSeeder::class,       // Módulo 3
+            EspecialidadSeeder::class,   // Módulo 4
+            ConsultorioSeeder::class,    // Módulo 5
         ]);
     }
 }
