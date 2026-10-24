@@ -3,6 +3,8 @@
 use App\Http\Controllers\BitacoraController;
 use App\Http\Controllers\ConsultorioController;
 use App\Http\Controllers\EspecialidadController;
+use App\Http\Controllers\HorarioAtencionController;
+use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
@@ -63,6 +65,38 @@ Route::middleware(['auth', 'activo'])->group(function () {
 
         Route::patch('consultorios/{consultorio}/estado', [ConsultorioController::class, 'cambiarEstado'])
             ->name('consultorios.estado');
+    });
+
+        // ===== Módulo 6: Médicos (RF03) =====
+    // Primero las rutas de gestión, para que /medicos/create no se confunda con /medicos/{medico}
+    Route::middleware('permiso:MEDICO_GESTIONAR')->group(function () {
+        Route::resource('medicos', MedicoController::class)
+            ->only(['create', 'store', 'edit', 'update'])
+            ->parameters(['medicos' => 'medico']);
+
+        Route::patch('medicos/{medico}/estado', [MedicoController::class, 'cambiarEstado'])
+            ->name('medicos.estado');
+    });
+
+    // Consulta: listado y agenda (Administrador y Recepcionista)
+    Route::middleware('permiso:MEDICO_VER')->group(function () {
+        Route::resource('medicos', MedicoController::class)
+            ->only(['index', 'show'])
+            ->parameters(['medicos' => 'medico']);
+    });
+
+    // ===== Módulo 7: Horarios de atención (RF05) =====
+    Route::middleware('permiso:HORARIO_GESTIONAR')->group(function () {
+        Route::resource('horarios', HorarioAtencionController::class)
+            ->only(['create', 'store', 'edit', 'update'])
+            ->parameters(['horarios' => 'horario']);
+
+        Route::patch('horarios/{horario}/estado', [HorarioAtencionController::class, 'cambiarEstado'])
+            ->name('horarios.estado');
+    });
+
+    Route::middleware('permiso:HORARIO_VER')->group(function () {
+        Route::get('horarios', [HorarioAtencionController::class, 'index'])->name('horarios.index');
     });
 });
 

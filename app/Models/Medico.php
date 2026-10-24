@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Medico extends Model
@@ -16,6 +17,26 @@ class Medico extends Model
     protected $casts = [
         'estado' => 'boolean',
     ];
+
+    /**
+     * Nombre completo: $medico->nombre_completo
+     */
+    protected function nombreCompleto(): Attribute
+    {
+        return Attribute::get(fn () => "{$this->nombres} {$this->apellidos}");
+    }
+
+    /**
+     * Genera el siguiente código: MED-001, MED-002...
+     */
+    public static function siguienteCodigo(): string
+    {
+        $ultimo = (int) static::query()
+            ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(codigo FROM 5) AS INTEGER)), 0) AS n')
+            ->value('n');
+
+        return 'MED-' . str_pad((string) ($ultimo + 1), 3, '0', STR_PAD_LEFT);
+    }
 
     public function user()
     {
