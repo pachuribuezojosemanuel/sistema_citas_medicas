@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Paciente extends Model
@@ -18,6 +19,34 @@ class Paciente extends Model
         'fecha_nacimiento' => 'date',
         'estado'           => 'boolean',
     ];
+
+    /**
+     * $paciente->nombre_completo
+     */
+    protected function nombreCompleto(): Attribute
+    {
+        return Attribute::get(fn () => "{$this->nombres} {$this->apellidos}");
+    }
+
+    /**
+     * $paciente->edad (en años)
+     */
+    protected function edad(): Attribute
+    {
+        return Attribute::get(fn () => $this->fecha_nacimiento?->age);
+    }
+
+    /**
+     * Genera el siguiente código: PAC-0001, PAC-0002... (RN01)
+     */
+    public static function siguienteCodigo(): string
+    {
+        $ultimo = (int) static::query()
+            ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(codigo FROM 5) AS INTEGER)), 0) AS n')
+            ->value('n');
+
+        return 'PAC-' . str_pad((string) ($ultimo + 1), 4, '0', STR_PAD_LEFT);
+    }
 
     public function user()
     {

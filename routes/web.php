@@ -5,6 +5,7 @@ use App\Http\Controllers\ConsultorioController;
 use App\Http\Controllers\EspecialidadController;
 use App\Http\Controllers\HorarioAtencionController;
 use App\Http\Controllers\MedicoController;
+use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
@@ -47,7 +48,7 @@ Route::middleware(['auth', 'activo'])->group(function () {
         ->middleware('permiso:BITACORA_VER')
         ->name('bitacora.index');
 
-        // ===== Módulo 4: Especialidades (RF04) =====
+    // ===== Módulo 4: Especialidades (RF04) =====
     Route::middleware('permiso:ESPECIALIDAD_GESTIONAR')->group(function () {
         Route::resource('especialidades', EspecialidadController::class)
             ->except(['show', 'destroy'])
@@ -67,7 +68,7 @@ Route::middleware(['auth', 'activo'])->group(function () {
             ->name('consultorios.estado');
     });
 
-        // ===== Módulo 6: Médicos (RF03) =====
+    // ===== Módulo 6: Médicos (RF03) =====
     // Primero las rutas de gestión, para que /medicos/create no se confunda con /medicos/{medico}
     Route::middleware('permiso:MEDICO_GESTIONAR')->group(function () {
         Route::resource('medicos', MedicoController::class)
@@ -97,6 +98,23 @@ Route::middleware(['auth', 'activo'])->group(function () {
 
     Route::middleware('permiso:HORARIO_VER')->group(function () {
         Route::get('horarios', [HorarioAtencionController::class, 'index'])->name('horarios.index');
+    });
+
+    // ===== Módulo 8: Pacientes (RF02) =====
+    // Primero las de gestión, para que /pacientes/create no se confunda con /pacientes/{paciente}
+    Route::middleware('permiso:PACIENTE_GESTIONAR')->group(function () {
+        Route::resource('pacientes', PacienteController::class)
+            ->only(['create', 'store', 'edit', 'update'])
+            ->parameters(['pacientes' => 'paciente']);
+
+        Route::patch('pacientes/{paciente}/estado', [PacienteController::class, 'cambiarEstado'])
+            ->name('pacientes.estado');
+    });
+
+    Route::middleware('permiso:PACIENTE_VER')->group(function () {
+        Route::resource('pacientes', PacienteController::class)
+            ->only(['index', 'show'])
+            ->parameters(['pacientes' => 'paciente']);
     });
 });
 

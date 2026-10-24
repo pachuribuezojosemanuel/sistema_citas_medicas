@@ -71,6 +71,8 @@
             let primerError = null;
 
             form.querySelectorAll('[data-reglas]').forEach(function (input) {
+                // Los campos deshabilitados no se envían, así que no se validan¿
+                if (input.disabled) { mostrarError(input, null); return; }
                 const mensaje = validarCampo(input, form);
                 mostrarError(input, mensaje);
                 if (mensaje && !primerError) primerError = input;

@@ -7,22 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Un paciente puede registrarse sin cuenta de acceso al portal.
+     * El índice UNIQUE se mantiene: PostgreSQL permite varios NULL.
      */
     public function up(): void
     {
         Schema::table('pacientes', function (Blueprint $table) {
-            //
+            $table->foreignId('user_id')->nullable()->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('pacientes', function (Blueprint $table) {
-            //
+            $table->foreignId('user_id')->nullable(false)->change();
         });
     }
 };
