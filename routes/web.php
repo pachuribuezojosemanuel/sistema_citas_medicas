@@ -13,6 +13,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PortalPacienteController;
+use App\Http\Controllers\ReporteController;
 use Illuminate\Support\Facades\Route;
 
 // La raíz lleva al inicio (si no hay sesión, 'auth' redirige al login)
