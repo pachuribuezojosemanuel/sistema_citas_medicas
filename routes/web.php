@@ -10,6 +10,9 @@ use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AgendaController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PortalPacienteController;
 use Illuminate\Support\Facades\Route;
 
 // La raíz lleva al inicio (si no hay sesión, 'auth' redirige al login)
@@ -18,7 +21,7 @@ Route::redirect('/', '/dashboard');
 // Todas las páginas internas requieren sesión válida y usuario activo (RF01)
 Route::middleware(['auth', 'activo'])->group(function () {
 
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
     // Perfil propio (sin eliminación de cuenta)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -118,7 +121,7 @@ Route::middleware(['auth', 'activo'])->group(function () {
             ->parameters(['pacientes' => 'paciente']);
     });
 
-        // ===== Módulos 9 a 12: Citas (RF06 a RF10) =====
+    // ===== Módulos 9 a 12: Citas (RF06 a RF10) =====
     // Las rutas con texto fijo (create, api) van ANTES de citas/{cita}
 
     // RF06: registrar
@@ -151,6 +154,38 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::get('citas', [CitaController::class, 'index'])->middleware('permiso:CITA_VER')->name('citas.index');
     Route::get('citas/{cita}', [CitaController::class, 'show'])
         ->whereNumber('cita')->middleware('permiso:CITA_VER,MI_AGENDA')->name('citas.show');
+
+    Route::middleware('permiso:CITA_REGISTRAR,CITA_REPROGRAMAR,MIS_CITAS')->group(function () {
+        Route::get('citas/api/medicos', [CitaController::class, 'medicosPorEspecialidad'])->name('citas.medicos');
+        Route::get('citas/api/disponibilidad', [CitaController::class, 'disponibilidad'])->name('citas.disponibilidad');
+    });
+
+    // ===== Módulo 13: Agenda médica (RF11) =====
+    Route::get('agenda', [AgendaController::class, 'index'])
+        ->middleware('permiso:AGENDA_VER')->name('agenda.index');
+    Route::get('mi-agenda', [AgendaController::class, 'mia'])
+        ->middleware('permiso:MI_AGENDA')->name('mi-agenda.index');
+
+    // ===== Módulo 17: Portal del paciente (sección 3.4) =====
+    Route::middleware('permiso:MIS_CITAS')->group(function () {
+        Route::get('mis-citas', [PortalPacienteController::class, 'misCitas'])->name('mis-citas.index');
+        Route::get('mis-citas/reservar', [PortalPacienteController::class, 'reservar'])->name('mis-citas.create');
+        Route::post('mis-citas', [PortalPacienteController::class, 'guardarReserva'])->name('mis-citas.store');
+        Route::patch('mis-citas/{cita}/cancelar', [PortalPacienteController::class, 'cancelar'])
+            ->whereNumber('cita')->name('mis-citas.cancelar');
+
+        Route::get('mi-perfil', [PortalPacienteController::class, 'perfil'])->name('mi-perfil.edit');
+        Route::put('mi-perfil', [PortalPacienteController::class, 'actualizarPerfil'])->name('mi-perfil.update');
+    });
+
+        // ===== Módulo 15: Reportes (RF13) =====
+    Route::middleware('permiso:REPORTE_VER')->prefix('reportes')->name('reportes.')->group(function () {
+        Route::get('/',          [ReporteController::class, 'index'])->name('index');
+        Route::get('citas',      [ReporteController::class, 'citas'])->name('citas');
+        Route::get('resumen',    [ReporteController::class, 'resumen'])->name('resumen');
+        Route::get('pacientes',  [ReporteController::class, 'pacientes'])->name('pacientes');
+        Route::get('agenda',     [ReporteController::class, 'agenda'])->name('agenda');
+    });
 });
 
 require __DIR__ . '/auth.php';

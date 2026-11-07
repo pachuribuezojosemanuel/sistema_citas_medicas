@@ -26,6 +26,8 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // Médicos y pacientes cambian sus datos en su propio módulo
+        abort_if($request->user()->medico || $request->user()->paciente, 403);
         $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
@@ -36,6 +38,4 @@ class ProfileController extends Controller
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
-
-    
 }

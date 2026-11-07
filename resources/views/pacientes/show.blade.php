@@ -10,14 +10,14 @@
                 @if (Route::has('citas.create') && $paciente->estado)
                     @permiso('CITA_REGISTRAR')
                         <a href="{{ route('citas.create', ['paciente_id' => $paciente->id]) }}"
-                           class="inline-flex items-center px-4 py-2 bg-indigo-600 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500">
+                            class="inline-flex items-center px-4 py-2 bg-indigo-600 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500">
                             Nueva cita
                         </a>
                     @endpermiso
                 @endif
                 @permiso('PACIENTE_GESTIONAR')
                     <a href="{{ route('pacientes.edit', $paciente) }}"
-                       class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                         Editar
                     </a>
                 @endpermiso
@@ -36,14 +36,39 @@
                         <x-estado-badge :activo="$paciente->estado" />
                     </div>
                     <dl class="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-                        <div><dt class="text-gray-500">CI</dt><dd class="font-medium">{{ $paciente->ci }}</dd></div>
-                        <div><dt class="text-gray-500">Fecha de nacimiento</dt><dd class="font-medium">{{ $paciente->fecha_nacimiento->format('d/m/Y') }} ({{ $paciente->edad }} años)</dd></div>
-                        <div><dt class="text-gray-500">Sexo</dt><dd class="font-medium">{{ $paciente->sexo->nombre }}</dd></div>
-                        <div><dt class="text-gray-500">Teléfono</dt><dd class="font-medium">{{ $paciente->telefono }}</dd></div>
-                        <div><dt class="text-gray-500">Correo</dt><dd class="font-medium">{{ $paciente->correo ?? '—' }}</dd></div>
-                        <div><dt class="text-gray-500">Dirección</dt><dd class="font-medium">{{ $paciente->direccion ?? '—' }}</dd></div>
-                        <div><dt class="text-gray-500">Registrado</dt><dd class="font-medium">{{ $paciente->created_at->format('d/m/Y') }}</dd></div>
-                        <div><dt class="text-gray-500">Cuenta</dt><dd class="font-medium">{{ $paciente->user?->name ?? 'Sin cuenta' }}</dd></div>
+                        <div>
+                            <dt class="text-gray-500">CI</dt>
+                            <dd class="font-medium">{{ $paciente->ci }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Fecha de nacimiento</dt>
+                            <dd class="font-medium">{{ $paciente->fecha_nacimiento->format('d/m/Y') }}
+                                ({{ $paciente->edad }} años)</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Sexo</dt>
+                            <dd class="font-medium">{{ $paciente->sexo->nombre }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Teléfono</dt>
+                            <dd class="font-medium">{{ $paciente->telefono }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Correo</dt>
+                            <dd class="font-medium">{{ $paciente->correo ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Dirección</dt>
+                            <dd class="font-medium">{{ $paciente->direccion ?? '—' }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Registrado</dt>
+                            <dd class="font-medium">{{ $paciente->created_at->format('d/m/Y') }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-500">Cuenta</dt>
+                            <dd class="font-medium">{{ $paciente->user?->name ?? 'Sin cuenta' }}</dd>
+                        </div>
                     </dl>
                     @unless ($paciente->estado)
                         <p class="mt-4 text-sm text-red-600">Paciente inactivo. Su historial se conserva.</p>
@@ -77,7 +102,9 @@
                         <dd>
                             @forelse ($paciente->alergias as $a)
                                 <div class="font-medium text-red-700">{{ $a->nombre }}
-                                    @if ($a->pivot->observacion)<span class="font-normal text-gray-500">— {{ $a->pivot->observacion }}</span>@endif
+                                    @if ($a->pivot->observacion)
+                                        <span class="font-normal text-gray-500">— {{ $a->pivot->observacion }}</span>
+                                    @endif
                                 </div>
                             @empty
                                 <span class="font-medium">Ninguna registrada</span>
@@ -90,8 +117,13 @@
                             @forelse ($paciente->enfermedades as $e)
                                 <div class="font-medium">{{ $e->nombre }}
                                     <span class="font-normal text-gray-500">
-                                        @if ($e->pivot->fecha_diagnostico) (desde {{ \Carbon\Carbon::parse($e->pivot->fecha_diagnostico)->format('d/m/Y') }}) @endif
-                                        @if ($e->pivot->observacion) — {{ $e->pivot->observacion }} @endif
+                                        @if ($e->pivot->fecha_diagnostico)
+                                            (desde
+                                            {{ \Carbon\Carbon::parse($e->pivot->fecha_diagnostico)->format('d/m/Y') }})
+                                        @endif
+                                        @if ($e->pivot->observacion)
+                                            — {{ $e->pivot->observacion }}
+                                        @endif
                                     </span>
                                 </div>
                             @empty
@@ -112,7 +144,15 @@
 
             {{-- Historial de citas (RF02: consultar sus citas anteriores) --}}
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
-                <h3 class="font-semibold text-gray-800">Historial de citas</h3>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h3 class="font-semibold text-gray-800">Historial de citas ({{ $citas->count() }})</h3>
+                    <div class="flex flex-wrap gap-3 text-sm">
+                        @foreach ($citas->countBy(fn($c) => $c->estado->nombre) as $nombre => $total)
+                            <span class="flex items-center gap-1"><x-estado-cita :estado="$nombre" />
+                                {{ $total }}</span>
+                        @endforeach
+                    </div>
+                </div>
 
                 @if ($citas->isEmpty())
                     <p class="mt-3 text-sm text-gray-500">El paciente no tiene citas registradas.</p>
@@ -135,12 +175,13 @@
                                     <tr>
                                         <td class="py-2 pe-4 font-mono">{{ $cita->codigo }}</td>
                                         <td class="py-2 pe-4">{{ $cita->fecha->format('d/m/Y') }}</td>
-                                        <td class="py-2 pe-4">{{ substr($cita->hora_inicio, 0, 5) }}–{{ substr($cita->hora_fin, 0, 5) }}</td>
+                                        <td class="py-2 pe-4">
+                                            {{ substr($cita->hora_inicio, 0, 5) }}–{{ substr($cita->hora_fin, 0, 5) }}
+                                        </td>
                                         <td class="py-2 pe-4">{{ $cita->medico->nombre_completo }}</td>
                                         <td class="py-2 pe-4">{{ $cita->especialidad->nombre }}</td>
-                                        <td class="py-2 pe-4">{{ $cita->estado->nombre }}</td>
+                                        <td class="py-2 pe-4"><x-estado-cita :estado="$cita->estado->nombre" /></td>
                                         <td class="py-2">{{ $cita->created_at->format('d/m/Y H:i') }}</td>
-                                        <td class="py-2 pe-4 font-mono">{{ $cita->codigo }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

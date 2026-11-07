@@ -77,6 +77,18 @@ class Cita extends Model
         return in_array($nuevo, self::TRANSICIONES[$this->estado->nombre] ?? [], true);
     }
 
+        /**
+     * Citas pendientes de atender: Programadas o Confirmadas.
+     * Uso: Cita::pendientes()->...
+     */
+    public function scopePendientes($consulta)
+    {
+        return $consulta->whereIn('estado_cita_id', [
+            EstadoCita::idDe(EstadoCita::PROGRAMADA),
+            EstadoCita::idDe(EstadoCita::CONFIRMADA),
+        ]);
+    }
+
     // ---- Relaciones ----
 
     public function paciente()

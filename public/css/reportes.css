@@ -1,0 +1,14 @@
+/* Elementos que solo aparecen al imprimir */
+.solo-imprimir { display: none; }
+
+@media print {
+    nav, .no-imprimir, header button { display: none !important; }
+    .solo-imprimir { display: block !important; }
+    body, .min-h-screen, .bg-gray-100 { background: #fff !important; }
+    .shadow-sm { box-shadow: none !important; }
+    .py-8 { padding-top: 0 !important; }
+    table { font-size: 11px; }
+    a { color: inherit !important; text-decoration: none !important; }
+    .salto-pagina { break-before: page; }
+    tr, .evitar-corte { break-inside: avoid; }
+}
