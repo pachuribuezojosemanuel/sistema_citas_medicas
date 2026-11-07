@@ -140,6 +140,7 @@
                                         <td class="py-2 pe-4">{{ $cita->especialidad->nombre }}</td>
                                         <td class="py-2 pe-4">{{ $cita->estado->nombre }}</td>
                                         <td class="py-2">{{ $cita->created_at->format('d/m/Y H:i') }}</td>
+                                        <td class="py-2 pe-4 font-mono">{{ $cita->codigo }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

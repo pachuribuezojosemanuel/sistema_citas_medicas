@@ -138,6 +138,7 @@
                                     <td class="py-2">{{ $cita->paciente->nombres }} {{ $cita->paciente->apellidos }}</td>
                                     <td class="py-2">{{ $cita->especialidad->nombre }}</td>
                                     <td class="py-2">{{ $cita->estado->nombre }}</td>
+                                    <td class="py-2 pe-4 font-mono"><a href="{{ route('citas.show', $cita) }}" class="text-indigo-600 hover:underline">{{ $cita->codigo }}</a></td>
                                 </tr>
                             @endforeach
                         </tbody>

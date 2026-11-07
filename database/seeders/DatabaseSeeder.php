@@ -17,7 +17,8 @@ class DatabaseSeeder extends Seeder
             EspecialidadSeeder::class,   // Módulo 4
             ConsultorioSeeder::class,    // Módulo 5
             MedicoSeeder::class,         // Módulos 6 y 7 (datos de prueba)
-            PacienteSeeder::class,       // Módulo 8 (datos de prueba)
+            PacienteSeeder::class,       // Módulo 8 (datos de prueba)|
+            CitaSeeder::class,           // Módulos 9 a 12 (datos de prueba)
         ]);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BitacoraController;
+use App\Http\Controllers\CitaController;
 use App\Http\Controllers\ConsultorioController;
 use App\Http\Controllers\EspecialidadController;
 use App\Http\Controllers\HorarioAtencionController;
@@ -116,6 +117,40 @@ Route::middleware(['auth', 'activo'])->group(function () {
             ->only(['index', 'show'])
             ->parameters(['pacientes' => 'paciente']);
     });
+
+        // ===== Módulos 9 a 12: Citas (RF06 a RF10) =====
+    // Las rutas con texto fijo (create, api) van ANTES de citas/{cita}
+
+    // RF06: registrar
+    Route::middleware('permiso:CITA_REGISTRAR')->group(function () {
+        Route::get('citas/create', [CitaController::class, 'create'])->name('citas.create');
+        Route::post('citas', [CitaController::class, 'store'])->name('citas.store');
+    });
+
+    // Consultas JSON para el formulario (Fetch API)
+    Route::middleware('permiso:CITA_REGISTRAR,CITA_REPROGRAMAR')->group(function () {
+        Route::get('citas/api/medicos', [CitaController::class, 'medicosPorEspecialidad'])->name('citas.medicos');
+        Route::get('citas/api/disponibilidad', [CitaController::class, 'disponibilidad'])->name('citas.disponibilidad');
+    });
+
+    // RF08: reprogramar
+    Route::middleware('permiso:CITA_REPROGRAMAR')->group(function () {
+        Route::get('citas/{cita}/reprogramar', [CitaController::class, 'reprogramarForm'])->whereNumber('cita')->name('citas.reprogramar');
+        Route::put('citas/{cita}/reprogramar', [CitaController::class, 'reprogramar'])->whereNumber('cita')->name('citas.reprogramar.guardar');
+    });
+
+    // RF09: cancelar
+    Route::patch('citas/{cita}/cancelar', [CitaController::class, 'cancelar'])
+        ->whereNumber('cita')->middleware('permiso:CITA_CANCELAR')->name('citas.cancelar');
+
+    // RF10: cambiar estado (confirmar, atendida, inasistencia)
+    Route::patch('citas/{cita}/estado', [CitaController::class, 'cambiarEstado'])
+        ->whereNumber('cita')->middleware('permiso:CITA_ASISTENCIA,CITA_ATENDER')->name('citas.estado');
+
+    // Consulta
+    Route::get('citas', [CitaController::class, 'index'])->middleware('permiso:CITA_VER')->name('citas.index');
+    Route::get('citas/{cita}', [CitaController::class, 'show'])
+        ->whereNumber('cita')->middleware('permiso:CITA_VER,MI_AGENDA')->name('citas.show');
 });
 
 require __DIR__ . '/auth.php';

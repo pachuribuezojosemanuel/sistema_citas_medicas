@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
 class Cita extends Model
@@ -16,6 +18,66 @@ class Cita extends Model
     protected $casts = [
         'fecha' => 'date',
     ];
+
+    public const MODALIDADES = ['Presencial', 'Virtual'];
+
+    /**
+     * Transiciones de estado permitidas (RF10).
+     * Atendida, Cancelada e Inasistencia son estados finales.
+     */
+    public const TRANSICIONES = [
+        EstadoCita::PROGRAMADA   => [EstadoCita::CONFIRMADA, EstadoCita::ATENDIDA, EstadoCita::INASISTENCIA, EstadoCita::CANCELADA],
+        EstadoCita::CONFIRMADA   => [EstadoCita::ATENDIDA, EstadoCita::INASISTENCIA, EstadoCita::CANCELADA],
+        EstadoCita::ATENDIDA     => [],
+        EstadoCita::CANCELADA    => [],
+        EstadoCita::INASISTENCIA => [],
+    ];
+
+    /**
+     * Genera el siguiente código: CM-0001, CM-0002...
+     */
+    public static function siguienteCodigo(): string
+    {
+        $ultimo = (int) static::query()
+            ->selectRaw('COALESCE(MAX(CAST(SUBSTRING(codigo FROM 4) AS INTEGER)), 0) AS n')
+            ->value('n');
+
+        return 'CM-' . str_pad((string) ($ultimo + 1), 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * $cita->horario → "09:00–09:30"
+     */
+    protected function horario(): Attribute
+    {
+        return Attribute::get(fn () => substr($this->hora_inicio, 0, 5) . '–' . substr($this->hora_fin, 0, 5));
+    }
+
+    /**
+     * Fecha y hora en que empieza la cita.
+     */
+    public function inicio(): Carbon
+    {
+        return $this->fecha->copy()->setTimeFromTimeString($this->hora_inicio);
+    }
+
+    /**
+     * ¿Se puede reprogramar o cancelar? (solo Programada o Confirmada)
+     */
+    public function esModificable(): bool
+    {
+        return in_array($this->estado->nombre, [EstadoCita::PROGRAMADA, EstadoCita::CONFIRMADA], true);
+    }
+
+    /**
+     * ¿Está permitida la transición al estado indicado?
+     */
+    public function puedeCambiarA(string $nuevo): bool
+    {
+        return in_array($nuevo, self::TRANSICIONES[$this->estado->nombre] ?? [], true);
+    }
+
+    // ---- Relaciones ----
 
     public function paciente()
     {
